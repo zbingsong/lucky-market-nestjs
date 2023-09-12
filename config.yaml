@@ -10,6 +10,10 @@ postgres:
   password: "postgres"
   database: "lucky_market"
 
+mongo:
+  uri: "mongodb://localhost:27017"
+  dbName: "lucky_market"
+
 redis:
   host: "localhost"
   port: 6379
