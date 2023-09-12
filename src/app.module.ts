@@ -20,6 +20,7 @@ import { RedisClientOptions } from 'redis';
 import { redisStore } from 'cache-manager-redis-yet';
 import { AuthModule } from './auth/auth.module';
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose';
+import { AdminModule } from './admin/admin.module';
 
 const YAML_CONFIG_NAME = 'config.yaml';
 
@@ -100,6 +101,7 @@ const YAML_CONFIG_NAME = 'config.yaml';
     StoreModule,
     UserModule,
     AuthModule,
+    AdminModule,
   ],
 })
 export class AppModule {}
