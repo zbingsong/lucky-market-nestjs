@@ -4,6 +4,7 @@ import { PostgresConfig } from './postgres.config';
 import { JwtConfig } from './jwt.config';
 import { RedisConfig } from './redis.config';
 import { HashingConfig } from './hashing.config';
+import { MongoConfig } from './mongo.config';
 
 export class AppConfig {
   @IsDefined()
@@ -15,6 +16,11 @@ export class AppConfig {
   @Type(() => PostgresConfig)
   @ValidateNested()
   postgres!: PostgresConfig;
+
+  @IsDefined()
+  @Type(() => MongoConfig)
+  @ValidateNested()
+  mongo!: MongoConfig;
 
   @IsDefined()
   @Type(() => RedisConfig)

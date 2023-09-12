@@ -6,7 +6,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { plainToClass } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { join } from 'path';
-import { AppConfig, PostgresConfig, RedisConfig } from './common/config';
+import {
+  AppConfig,
+  MongoConfig,
+  PostgresConfig,
+  RedisConfig,
+} from './common/config';
 import { readFileSync } from 'fs';
 import * as yaml from 'js-yaml';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
@@ -14,6 +19,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { RedisClientOptions } from 'redis';
 import { redisStore } from 'cache-manager-redis-yet';
 import { AuthModule } from './auth/auth.module';
+import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose';
 
 const YAML_CONFIG_NAME = 'config.yaml';
 
@@ -59,15 +65,20 @@ const YAML_CONFIG_NAME = 'config.yaml';
       },
     }),
     // for mongodb
-    // MongooseModule.forRootAsync({
-    //   imports: [ConfigModule],
-    //   useFactory: async (configService: ConfigService) => ({
-    //     uri: configService.get<string>('MONGO_URI'),
-    //     useNewUrlParser: true,
-    //     useUnifiedTopology: true,
-    //   }),
-    //   inject: [ConfigService],
-    // }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService<AppConfig, true>) => {
+        const mongoConfig: MongoConfig =
+          configService.get<MongoConfig>('mongo');
+        return {
+          uri: mongoConfig.uri,
+          dbName: mongoConfig.dbName,
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+        } as MongooseModuleOptions;
+      },
+      inject: [ConfigService],
+    }),
     // for redis
     CacheModule.registerAsync<RedisClientOptions>({
       imports: [ConfigModule],
