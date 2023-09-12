@@ -24,4 +24,9 @@ export class AuthController {
       return this.authService.login(req.user as UserEntity);
     }
   }
+
+  @Post('logout')
+  async logout(@Req() req: Request): Promise<void> {
+    await this.authService.logout(req.user as UserEntity);
+  }
 }

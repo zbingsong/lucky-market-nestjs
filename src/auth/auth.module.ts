@@ -7,6 +7,7 @@ import { AppConfig, JwtConfig } from 'src/common/config';
 import { PassportModule } from '@nestjs/passport';
 import { LoginStrategy } from './login.strategy';
 import { JwtStrategy } from './jwt.strategy';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { JwtStrategy } from './jwt.strategy';
     PassportModule.register({
       defaultStrategy: 'jwt',
     }),
+    CacheModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtService, LoginStrategy, JwtStrategy],
