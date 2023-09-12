@@ -5,14 +5,15 @@ import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { plainToClass } from 'class-transformer';
 import { validateSync } from 'class-validator';
-import path from 'path';
-import { AppConfig, RedisConfig } from './common/config';
+import { join } from 'path';
+import { AppConfig, PostgresConfig, RedisConfig } from './common/config';
 import { readFileSync } from 'fs';
 import * as yaml from 'js-yaml';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { CacheModule } from '@nestjs/cache-manager';
 import { RedisClientOptions } from 'redis';
 import { redisStore } from 'cache-manager-redis-yet';
+import { AuthModule } from './auth/auth.module';
 
 const YAML_CONFIG_NAME = 'config.yaml';
 
@@ -24,10 +25,10 @@ const YAML_CONFIG_NAME = 'config.yaml';
       load: [
         () => {
           const yamlConfig = readFileSync(
-            path.join(__dirname, YAML_CONFIG_NAME),
+            join(__dirname, YAML_CONFIG_NAME),
             'utf8',
           );
-          return yaml.load(yamlConfig);
+          return yaml.load(yamlConfig) as Record<string, any>;
         },
       ],
       validationSchema: new AppConfig(),
@@ -47,12 +48,15 @@ const YAML_CONFIG_NAME = 'config.yaml';
     // for postgres db
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        ...configService.get<TypeOrmModuleOptions>('database'),
-        synchronize: true,
-        entities: [__dirname + '/**/common/entities/*.entity{.ts,.js}'],
-      }),
       inject: [ConfigService],
+      useFactory: (configService: ConfigService<AppConfig, true>) => {
+        const postgresConfig = configService.get<PostgresConfig>('postgres');
+        return {
+          ...postgresConfig,
+          synchronize: true,
+          entities: [__dirname + '/**/common/entities/*.entity{.ts,.js}'],
+        } as TypeOrmModuleOptions;
+      },
     }),
     // for mongodb
     // MongooseModule.forRootAsync({
@@ -68,7 +72,7 @@ const YAML_CONFIG_NAME = 'config.yaml';
     CacheModule.registerAsync<RedisClientOptions>({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => {
+      useFactory: async (configService: ConfigService<AppConfig, true>) => {
         const redisConfig = configService.get<RedisConfig>('redis');
         return {
           store: redisStore,
@@ -84,6 +88,7 @@ const YAML_CONFIG_NAME = 'config.yaml';
     ProductModule,
     StoreModule,
     UserModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

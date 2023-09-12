@@ -1,7 +1,9 @@
-import { IsDefined, IsString } from 'class-validator';
+import { IsDefined, IsInt, Max, Min } from 'class-validator';
 
 export class HashingConfig {
   @IsDefined()
-  @IsString()
-  passwordSecret!: string;
+  @IsInt()
+  @Min(1)
+  @Max(12)
+  rounds!: number;
 }
