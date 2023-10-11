@@ -12,6 +12,9 @@ import { AppConfig, JwtConfig } from '../config';
 import { JwtPayload } from 'src/auth/dto';
 import { IS_PUBLIC_ENDPOINT } from '../decorators';
 
+/**
+ * @deprecated
+ */
 @Injectable()
 export class AuthGuard implements CanActivate {
   private readonly jwtConfig: JwtConfig;

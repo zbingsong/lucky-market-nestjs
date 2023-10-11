@@ -1,7 +1,15 @@
-import { Column, Entity, Index, JoinColumn, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { StoreEntity } from './store.entity';
 import { Role } from '../enums';
+import { SessionEntity } from './session.entity';
 
 @Entity({ name: 'user' })
 export class UserEntity extends BaseEntity {
@@ -30,4 +38,7 @@ export class UserEntity extends BaseEntity {
   @OneToOne(() => StoreEntity, (store) => store.owner, { nullable: false })
   @JoinColumn()
   store!: Promise<StoreEntity>;
+
+  @OneToMany(() => SessionEntity, (session) => session.user, { nullable: true })
+  sessions?: string[];
 }

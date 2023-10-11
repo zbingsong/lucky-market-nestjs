@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { USER_ROLE } from '../decorators';
 import { Role } from '../enums';
-import { UserEntity } from '../entities';
+import { ICurrentUser } from '../interfaces';
 
 /**
  * must activate after JwtGuard
@@ -18,7 +18,7 @@ export class RolesGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
     const request: Request = context.switchToHttp().getRequest();
-    const user: UserEntity = request.user as UserEntity;
-    return requiredRole <= user.role;
+    const user = request.user as ICurrentUser | undefined;
+    return user ? requiredRole <= user.role : false;
   }
 }

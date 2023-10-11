@@ -5,6 +5,7 @@ import { JwtConfig } from './jwt.config';
 import { RedisConfig } from './redis.config';
 import { HashingConfig } from './hashing.config';
 import { MongoConfig } from './mongo.config';
+import { TtlsConfig } from './ttls.config';
 
 export class AppConfig {
   @IsDefined()
@@ -31,4 +32,9 @@ export class AppConfig {
   @Type(() => HashingConfig)
   @ValidateNested()
   hashing!: HashingConfig;
+
+  @IsDefined()
+  @Type(() => TtlsConfig)
+  @ValidateNested()
+  ttls!: TtlsConfig;
 }

@@ -19,9 +19,15 @@ redis:
   port: 6379
   dbs:
     default: 0
-  ttls:
-    default: 0
+    auth: 1
 
 # use bcrypt for hashing
 hashing:
   rounds: 8
+
+# for signing cookies
+cookie-secret: "COOKIE_SECRET_LUCKY_MARKET"
+
+# in milliseconds
+ttls:
+  session: 604800000

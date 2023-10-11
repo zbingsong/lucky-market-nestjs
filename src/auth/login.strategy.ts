@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
 import { AuthService } from './auth.service';
 import { UserEntity } from 'src/common/entities';
+import { ICurrentUser } from 'src/common/interfaces';
 
 @Injectable()
 export class LoginStrategy extends PassportStrategy(Strategy, 'login') {
@@ -13,14 +14,28 @@ export class LoginStrategy extends PassportStrategy(Strategy, 'login') {
     });
   }
 
-  async validate(usernameOrEmail: string, password: string): Promise<any> {
-    const user: UserEntity | null = await this.authService.validateUser(
-      usernameOrEmail,
-      password,
-    );
+  /**
+   * Will be called by LoginGuard
+   * @param usernameOrEmail the username or email of the user used for login
+   * @param password the password of the user used for login
+   * @returns UserEntity if the combination is valid
+   * @exception UnauthorizedException if the combination is invalid
+   */
+  async validate(
+    usernameOrEmail: string,
+    password: string,
+  ): Promise<ICurrentUser> {
+    // check database for combination of usernameOrEmail and password
+    const user: UserEntity | null =
+      await this.authService.validateUserCredential(usernameOrEmail, password);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Invalid credentials');
     }
-    return user;
+    const currentUser: ICurrentUser = {
+      userId: user.id,
+      username: user.username,
+      role: user.role,
+    };
+    return currentUser;
   }
 }

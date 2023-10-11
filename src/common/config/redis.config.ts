@@ -14,14 +14,12 @@ export class RedisDbConfig {
   @Min(0)
   @Max(7)
   default!: number;
-}
 
-export class RedisTtlConfig {
   @IsDefined()
   @IsInt()
   @Min(0)
-  @Max(40000000)
-  default!: number;
+  @Max(7)
+  auth!: number;
 }
 
 export class RedisConfig {
@@ -39,9 +37,4 @@ export class RedisConfig {
   @Type(() => RedisDbConfig)
   @ValidateNested()
   dbs!: RedisDbConfig;
-
-  @IsDefined()
-  @Type(() => RedisTtlConfig)
-  @ValidateNested()
-  ttls!: RedisTtlConfig;
 }

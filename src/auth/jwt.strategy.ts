@@ -5,32 +5,46 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AppConfig, JwtConfig } from 'src/common/config';
 import { JwtPayload } from './dto';
 import { UserEntity } from 'src/common/entities';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { AuthService } from './auth.service';
+import { ICurrentUser } from 'src/common/interfaces';
+import { Request } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
+    private readonly authService: AuthService,
     readonly configService: ConfigService<AppConfig, true>,
   ) {
     const jwtConfig = configService.get<JwtConfig>('jwt');
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (req: Request) => req?.signedCookies?.jwt ?? null,
+      ]),
       secretOrKey: jwtConfig.secret,
       ignoreExpiration: false,
     });
   }
 
-  async validate(payload: JwtPayload): Promise<UserEntity> {
-    const user: UserEntity | null = await this.userRepository.findOneBy({
-      id: payload.userId,
-    });
+  /**
+   * Will be called by JwtGuard
+   * ASSUMPTION: the token is valid
+   * @param payload the payload encoded in JWT token, containing sessionId
+   * @returns ICurrentUser corresponding to the payload
+   * @exception UnauthorizedException if the user is not found
+   */
+  async validate(payload: JwtPayload): Promise<ICurrentUser> {
+    const user: UserEntity | null = await this.authService.validateSession(
+      payload.sessionId,
+    );
     if (!user) {
       throw new UnauthorizedException('Invalid token');
     }
-    // TODO: check session in Redis or MongoDB
-    return user;
+    // build ICurrentUser from UserEntity
+    const currentUser: ICurrentUser = {
+      userId: user.id,
+      username: user.username,
+      role: user.role,
+    };
+    return currentUser;
   }
 }
