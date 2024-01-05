@@ -1,5 +1,8 @@
-# Nest.js for LuckyMarket
+# Nest.js for LuckyMarket (Deprecated)
+
 A backend of LuckyMarket in Nest.js to replace the old Node.js+Express.js stack.
+
+Update: this backend is deprecated. A Spring Boot backend was selected as the final decision.
 
 
 
